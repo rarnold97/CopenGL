@@ -1,65 +1,67 @@
+# STANDARD CMAKE DIRECTIVES
 cmake_minimum_required(VERSION 3.17)
 project(CopenGL)
+add_definitions(-D__STDC_LIMIT_MACROS)
+add_definitions(-D__STDC_CONSTANT_MACROS)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-
+#FIND SYSTEM PACKAGES
 find_package(Threads REQUIRED)
-
-
 #find_package(glfw3 3.3 REQUIRED)
 find_package(OpenGL REQUIRED)
-#find_package(Threads)
-#find_package(GLUT REQUIRED)
+
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
+#FIND GLEW
 set(CMAKE_PREFIX_PATH "C:/tools/glew-2.2.0")
-set(CMAKE_LIBRARY_PATH "C:/tools/glew-2.2.0/lib/Release/x64")
-
-add_subdirectory(glfw-3.3.2)
+set(CMAKE_LIBRARY_PATH "C:/tools/glew-2.2.0/lib/Release/Win32/")
 find_package(GLEW REQUIRED)
 
+add_subdirectory(glfw-3.3.2)
+#add_library(GLEW glew/src/glew.c)
 
-set(CMAKE_PREFIX_PATH "C:/tools/qt5/5.12.10/winrt_x64_msvc2017/bin")
-set(QT_QPA_PLATFORM_PLUGIN_PATH "C:/tools/qt5/5.12.10/winrt_x64_msvc2017/plugins/platforms")
-set(QT_PLUGIN_PATH "C:/tools/qt5/5.12.10/winrt_x64_msvc2017/plugins")
-
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
-find_package(Qt5OpenGL REQUIRED)
+# FIND QT LIBRARIES
+find_package(Qt5 COMPONENTS Widgets Core Gui OpenGL REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 set(QT_VERSION 5)
 
-#set(CMAKE_LIBRARY_PATH "freeglut")
-#add_subdirectory(freeglut)
-
-#using glad instead now
+# GLAD LIBRARIES
 add_library(GLAD "glad/src/glad.c")
 
-include_directories(${OPENGL_INCLUDE_DIR} C:/tools/mingw32/include helper_files glad/include)
+#INCLUDE DIRECTORIES
+#mingw build
+#include_directories(${OPENGL_INCLUDE_DIR} C:/tools/mingw32/include helper_files glad/include)
+#VS build
+include_directories(${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS} helper_files glad/include )
 
-
+#AUTO INCLUDE SCRIPTS
 file(GLOB SOURCE_FILES
         *.cpp
         *.h
         )
 
+#APP DESIGNER STUFF
 # to design qt uis in app designer
 # set(FORMS <ui files>)
 # set(GUI_HEADERS <headers with qt ui shit in them>)
 # QT5_WRAP_CPP(QT_HEADERS ${GUI_HEADERS})
 # QT5_WRAP_UI(FORMS_HEADERS ${FORMS})
 # add_library(qtlib ${QT_HEADERS} ${FORMS_HEADERS})
+
+#CUSTOM LIBS AND SYSTEM LIBS
 set(LIBS glfw opengl32 GLAD)
 
+# COMPILE
 add_executable(CopenGL main.cpp ${SOURCE_FILES} helper_files/common_drawing.h helper_files/common_drawing.cpp helper_files/LoadShaders.h common/MeGlWindow.h common/MeGlWindow.cpp)
 
-target_link_libraries(CopenGL Threads::Threads Qt5::WinMain Qt5::Widgets Qt5::Core Qt5::Gui ${LIBS} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES} ${GLEW_LIBRARIES})
+qt5_use_modules(CopenGL Widgets OpenGL Gui Core)
+
+# LINK BABY AND ALSO FUCK YOURSELF WHILE YOU ARE AT IT THESE ARE THE WORST ERRORS ON PLANET EARTH
+target_link_libraries(CopenGL ${GLEW_LIBRARIES} Threads::Threads Qt5::WinMain Qt5::Widgets Qt5::Core Qt5::Gui ${LIBS} ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES} )

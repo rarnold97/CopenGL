@@ -1,7 +1,9 @@
 //
 // Created by ryanm on 2/1/2021.
 //
-/*
+
+//#include <GL/glew.h>
+
 #include <GL/glew.h>
 #include "MeGlWindow.h"
 
@@ -13,6 +15,7 @@ void MeGlWindow::paintGL()
 
 void MeGlWindow::initializeGL()
 {
-    glewInit();
+    //glewInit() ;
+    //glInit();
+
 }
-*/

@@ -1,11 +1,12 @@
 //
 // Created by ryanm on 1/28/2021.
 //
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-//#include <GL/freeglut.h>
+
 #include <iostream>
-#include "common_drawing.h"
+#include "helper_files/common_drawing.h"
 
 void renderWhiteRectangle();
 void renderColorfulTriangle(GLFWwindow *w);

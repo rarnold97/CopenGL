@@ -4,9 +4,8 @@
 
 #ifndef COPENGL_MEGLWINDOW_H
 #define COPENGL_MEGLWINDOW_H
-/*
-#include <GLFW/glfw3.h>
-//#include <GL/gl.h>
+
+//#include <GLFW/glfw3.h>
 #include <QApplication>
 #include <QtOpenGL/QGLWidget>
 
@@ -20,5 +19,5 @@ protected:
 public:
 
 };
-*/
+
 #endif //COPENGL_MEGLWINDOW_H

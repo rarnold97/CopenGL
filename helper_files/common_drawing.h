@@ -4,13 +4,12 @@
 
 #ifndef COPENGL_COMMON_DRAWING_H
 #define COPENGL_COMMON_DRAWING_H
-
-#include <GL/glew.h>
+#include "LoadShaders.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
-#include "LoadShaders.h"
+
 
 
 /// just need to pass in the color here
