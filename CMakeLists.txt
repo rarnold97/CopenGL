@@ -17,9 +17,10 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 #FIND GLEW
-set(CMAKE_PREFIX_PATH "C:/tools/glew-2.2.0")
-set(CMAKE_LIBRARY_PATH "C:/tools/glew-2.2.0/lib/Release/Win32/")
-find_package(GLEW REQUIRED)
+set(CMAKE_PREFIX_PATH "C:/tools/glew-2.2.0/lib/Release/x64")
+find_library(GLEW_LIB glew32.lib REQUIRED)
+
+#find_package(GLEW REQUIRED)
 
 add_subdirectory(glfw-3.3.2)
 #add_library(GLEW glew/src/glew.c)
@@ -39,7 +40,8 @@ add_library(GLAD "glad/src/glad.c")
 #mingw build
 #include_directories(${OPENGL_INCLUDE_DIR} C:/tools/mingw32/include helper_files glad/include)
 #VS build
-include_directories(${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS} helper_files glad/include )
+set(GLEW_INCLUDE "C:/tools/glew-2.2.0/include/")
+include_directories(${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS} ${GLEW_INCLUDE} helper_files glad/include )
 
 #AUTO INCLUDE SCRIPTS
 file(GLOB SOURCE_FILES
@@ -64,4 +66,4 @@ add_executable(CopenGL main.cpp ${SOURCE_FILES} helper_files/common_drawing.h he
 qt5_use_modules(CopenGL Widgets OpenGL Gui Core)
 
 # LINK BABY AND ALSO FUCK YOURSELF WHILE YOU ARE AT IT THESE ARE THE WORST ERRORS ON PLANET EARTH
-target_link_libraries(CopenGL ${GLEW_LIBRARIES} Threads::Threads Qt5::WinMain Qt5::Widgets Qt5::Core Qt5::Gui ${LIBS} ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES} )
+target_link_libraries(CopenGL ${GLEW_LIB} Threads::Threads Qt5::WinMain Qt5::Widgets Qt5::Core Qt5::Gui ${LIBS} ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES} )
