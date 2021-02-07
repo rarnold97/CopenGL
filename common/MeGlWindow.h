@@ -1,6 +1,7 @@
 //
 // Created by ryanm on 2/1/2021.
 //
+// source code as part of Jamie King's opengl playlist
 
 #ifndef COPENGL_MEGLWINDOW_H
 #define COPENGL_MEGLWINDOW_H
