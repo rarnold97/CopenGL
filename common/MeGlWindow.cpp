@@ -6,27 +6,30 @@
 #include <GL/glew.h>
 #include "MeGlWindow.h"
 
-void MeGlWindow::initializeGL()
+extern const char* vertexShaderCode ;
+extern const char* fragmentShaderCode ;
+
+void MeGlWindow::sendDataToOpenGL()
 {
-    glewInit() ;
-
+    // we need to write shaders to change the colors of the triangles
+    /// primarily concerned with vertex and fragment shaders
     GLfloat verts[] =
-        {
-            +0.0f, +0.0f, /// position vertex
-            +0.0, +0.0, +0.0, /// color
+            {
+                    +0.0f, +0.0f, /// position vertex
+                    +1.0, +0.0, +0.0, /// color
 
-            +1.0f, +1.0f,
-            +0.0, +0.0, +0.0,
+                    +1.0f, +1.0f,
+                    +1.0, +0.0, +0.0,
 
-            -1.0f, +1.0f,
-            +0.0, +0.0, +0.0,
+                    -1.0f, +1.0f,
+                    +1.0, +0.0, +0.0,
 
-            -1.0f, -1.0f,
-            +0.0, +0.0, +0.0,
+                    -1.0f, -1.0f,
+                    +1.0, +0.0, +0.0,
 
-            +1.0f, -1.0f,
-            +0.0, +0.0, +0.0,
-        };
+                    +1.0f, -1.0f,
+                    +1.0, +0.0, +0.0,
+            };
 
     GLuint vertexBufferID ;
     glGenBuffers(1, &vertexBufferID) ;
@@ -50,6 +53,38 @@ void MeGlWindow::initializeGL()
     glGenBuffers(1, &indexBufferID);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+}
+
+
+void MeGlWindow::installShaders()
+{
+    // going to use gl shading language
+    GLuint vertexShaderID =  glCreateShader(GL_VERTEX_SHADER);
+    GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+
+    const char* adapter[1];
+    adapter[0] = vertexShaderCode ;
+    glShaderSource(vertexShaderID, 1, adapter, 0);
+    adapter[0] = fragmentShaderCode;
+    glShaderSource(fragmentShaderID, 1, adapter, 0);
+
+    glCompileShader(vertexShaderID);
+    glCompileShader(fragmentShaderID);
+
+    GLuint programID = glCreateProgram();
+    glAttachShader(programID, vertexShaderID);
+    glAttachShader(programID, fragmentShaderID);
+    glLinkProgram(programID) ;
+
+    glUseProgram(programID);
+}
+
+void MeGlWindow::initializeGL()
+{
+    glewInit() ;
+    // member functions
+    sendDataToOpenGL();
+    installShaders();
 
 }
 

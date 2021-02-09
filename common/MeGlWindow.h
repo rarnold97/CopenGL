@@ -16,9 +16,10 @@ class MeGlWindow : public QGLWidget
 {
 protected:
     void initializeGL();
-    void paintGL();
+    void sendDataToOpenGL();
+    void installShaders();
 public:
-
+    void paintGL();
 };
 
 #endif //COPENGL_MEGLWINDOW_H

@@ -74,7 +74,7 @@ add_executable(CopenGL
         helper_files/common_drawing.cpp
         helper_files/LoadShaders.h
         common/MeGlWindow.h
-        common/MeGlWindow.cpp)
+        common/MeGlWindow.cpp common/MeShaderCode.cpp)
 
 qt5_use_modules(CopenGL Widgets OpenGL Gui Core)
 # LINK BABY AND ALSO FUCK YOURSELF WHILE YOU ARE AT IT THESE ARE THE WORST ERRORS ON PLANET EARTH
