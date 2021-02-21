@@ -34,7 +34,6 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 set(QT_VERSION 5)
 
-
 # GLAD LIBRARIES
 add_library(GLAD "middleware/glad/src/glad.c")
 
@@ -47,7 +46,10 @@ include_directories(
         ${GLEW_INCLUDE_DIRS}
         ${GLEW_INCLUDE}
         helper_files
-        middleware/glad/include )
+        middleware/glad/include
+        shaders
+        middleware/glm/glm
+        )
 
 #AUTO INCLUDE SCRIPTS
 file(GLOB SOURCE_FILES
@@ -74,7 +76,7 @@ add_executable(CopenGL
         helper_files/common_drawing.cpp
         helper_files/LoadShaders.h
         common/MeGlWindow.h
-        common/MeGlWindow.cpp common/MeShaderCode.cpp)
+        common/MeGlWindow.cpp common/Primitaves/Vertex.h common/Primitaves/Vertex.cpp common/Primitaves/ShapeData.cpp common/Primitaves/ShapeData.h common/Primitaves/ShapeGenerator.cpp common/Primitaves/ShapeGenerator.h)
 
 qt5_use_modules(CopenGL Widgets OpenGL Gui Core)
 # LINK BABY AND ALSO FUCK YOURSELF WHILE YOU ARE AT IT THESE ARE THE WORST ERRORS ON PLANET EARTH
