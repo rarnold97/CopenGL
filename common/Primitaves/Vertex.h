@@ -7,6 +7,8 @@
 
 #include <glm.hpp>
 
+const unsigned int NUM_FLOATS_PER_VERTICE = 6;
+const unsigned int VERTEX_BYTE_SIZE = NUM_FLOATS_PER_VERTICE * sizeof(float) ;
 
 struct Vertex
 {

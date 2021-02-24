@@ -30,8 +30,13 @@ protected:
     void installShaders();
     std::string readShaderCode(const char* fileName) ;
     void sendAnotherTriToOpenGL() ;
+
+    GLuint programID{} ;
+    //GLuint numIndices{} ;
 public:
     void paintGL();
+    MeGlWindow() ;
+    ~MeGlWindow() ;
 };
 
 #endif //COPENGL_MEGLWINDOW_H

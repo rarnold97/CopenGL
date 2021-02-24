@@ -8,12 +8,15 @@
 #include "ShapeData.h"
 #include "Vertex.h"
 #include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+
 #define NUM_ARRAY_ELEMENTS(a) sizeof(a) / sizeof(*a)
 
 class ShapeGenerator
 {
 public:
     static ShapeData makeTriangle();
+    static ShapeData makeCube();
 };
 
 
