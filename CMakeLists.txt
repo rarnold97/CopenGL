@@ -49,6 +49,7 @@ include_directories(
         middleware/glad/include
         shaders
         middleware/glm/glm
+        common/camera
         )
 
 #AUTO INCLUDE SCRIPTS
@@ -76,7 +77,15 @@ add_executable(CopenGL
         helper_files/common_drawing.cpp
         helper_files/LoadShaders.h
         common/MeGlWindow.h
-        common/MeGlWindow.cpp common/Primitaves/Vertex.h common/Primitaves/Vertex.cpp common/Primitaves/ShapeData.cpp common/Primitaves/ShapeData.h common/Primitaves/ShapeGenerator.cpp common/Primitaves/ShapeGenerator.h)
+        common/MeGlWindow.cpp
+        common/Primitaves/Vertex.h
+        common/Primitaves/Vertex.cpp
+        common/Primitaves/ShapeData.cpp
+        common/Primitaves/ShapeData.h
+        common/Primitaves/ShapeGenerator.cpp
+        common/Primitaves/ShapeGenerator.h
+        common/camera/Camera.cpp
+        common/camera/Camera.h)
 
 qt5_use_modules(CopenGL Widgets OpenGL Gui Core)
 # LINK BABY AND ALSO FUCK YOURSELF WHILE YOU ARE AT IT THESE ARE THE WORST ERRORS ON PLANET EARTH

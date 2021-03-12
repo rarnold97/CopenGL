@@ -8,49 +8,21 @@
 #include <iostream>
 #include "common/Primitaves/Vertex.h"
 #include "common/Primitaves/ShapeGenerator.h"
-
-
-GLuint numIndices ;
+#include <gtx/transform.hpp>
 
 
 MeGlWindow::MeGlWindow()
-{}
-
-MeGlWindow::~MeGlWindow()= default ;
-
-void MeGlWindow::sendDataToOpenGL()
 {
-    ShapeData shape = ShapeGenerator::makeCube() ;
-    // we need to write shaders to change the colors of the triangles
-    /// primarily concerned with vertex and fragment shaders
-    GLuint vertexBufferID ;
-    glGenBuffers(1, &vertexBufferID) ;
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID) ;
-    glBufferData(GL_ARRAY_BUFFER, shape.vertexBufferSize(), shape.vertices, GL_STATIC_DRAW) ;
-    glEnableVertexAttribArray(0);
-
-    /// attribute 0 is position
-    /// third arguement defines the stride for any given attribute (i.e., position, color, etc.)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, 0);
-    /// attribute 1 is color
-    glEnableVertexAttribArray(1);
-    /// the GL_FALSE arguement is a glbool for normalization
-    /// final arguement is where the first row of data for given attribute starts
-    /// in our case the color data starts at the third float element
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, (char*)(sizeof(float)*3));
-
-    // using a short to optimize the usage of detotated wam, especially since we are using modest wam
-
-    GLuint indexArrayBufferID;
-    glGenBuffers(1, &indexArrayBufferID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexArrayBufferID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape.indexBufferSize(), shape.indices, GL_STATIC_DRAW);
-    numIndices = shape.numIndices ;
-    // manage heap memory
-    shape.cleanup();
 }
 
-bool checkStatus(GLuint objectID,
+MeGlWindow::~MeGlWindow()
+{
+    glUseProgram(0) ;
+    glDeleteProgram(programID);
+}
+
+
+bool MeGlWindow::checkStatus(GLuint objectID,
                  PFNGLGETSHADERIVPROC objectPropertyGetterFunc,
                  PFNGLGETSHADERINFOLOGPROC getInfoLogFunc,
                  GLenum statusType)
@@ -73,13 +45,13 @@ bool checkStatus(GLuint objectID,
     return true;
 }
 
-bool checkShaderStatus(GLuint shaderID)
+bool MeGlWindow::checkShaderStatus(GLuint shaderID)
 {
     return checkStatus(shaderID, glGetShaderiv, glGetShaderInfoLog, GL_COMPILE_STATUS) ;
 }
 
 
-bool checkProgramStatus(GLuint programID)
+bool MeGlWindow::checkProgramStatus(GLuint programID)
 {
     return checkStatus(programID, glGetProgramiv, glGetProgramInfoLog, GL_LINK_STATUS);
 }
@@ -124,10 +96,18 @@ void MeGlWindow::installShaders()
     programID = glCreateProgram() ;
     glAttachShader(programID, vertexShaderID);
     glAttachShader(programID, fragmentShaderID);
+    glBindAttribLocation(programID, 0, "position") ;
     glLinkProgram(programID) ;
 
     if (! checkProgramStatus(programID))
         return ;
+
+    positionLocation = glGetAttribLocation(programID, "position") ;
+    colorLocation = glGetAttribLocation(programID, "vertexColor") ;
+    transformLocation = glGetAttribLocation(programID, "fullTransformMatrix") ;
+
+    glDeleteShader(vertexShaderID);
+    glDeleteShader(fragmentShaderID);
 
     glUseProgram(programID);
 }
@@ -138,8 +118,9 @@ void MeGlWindow::initializeGL()
     // enable depth buffer for z-axis data
     glEnable(GL_DEPTH_TEST);
     // member functions
-    sendDataToOpenGL();
     installShaders();
+    sendDataToOpenGL();
+
 
 }
 
@@ -166,28 +147,87 @@ void MeGlWindow::sendAnotherTriToOpenGL()
     numTris++ ;
 }
 
+
+void MeGlWindow::sendDataToOpenGL()
+{
+    ShapeData shape = ShapeGenerator::makeCube() ;
+    // we need to write shaders to change the colors of the triangles
+    /// primarily concerned with vertex and fragment shaders
+    GLuint vertexBufferID ;
+    glGenBuffers(1, &vertexBufferID) ;
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID) ;
+    glBufferData(GL_ARRAY_BUFFER, shape.vertexBufferSize(), shape.vertices, GL_STATIC_DRAW) ;
+    glEnableVertexAttribArray(positionLocation);
+
+    /// attribute 0 is position
+    /// third arguement defines the stride for any given attribute (i.e., position, color, etc.)
+    glVertexAttribPointer(positionLocation, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, 0);
+    /// attribute 1 is color
+    glEnableVertexAttribArray(colorLocation);
+    /// the GL_FALSE arguement is a glbool for normalization
+    /// final arguement is where the first row of data for given attribute starts
+    /// in our case the color data starts at the third float element
+    glVertexAttribPointer(colorLocation, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, (char*)(sizeof(float)*3));
+
+    // using a short to optimize the usage of detotated wam, especially since we are using modest wam
+
+    GLuint indexArrayBufferID;
+    glGenBuffers(1, &indexArrayBufferID);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexArrayBufferID);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, shape.indexBufferSize(), shape.indices, GL_STATIC_DRAW);
+    numIndices = shape.numIndices ;
+    // manage heap memory
+    shape.cleanup();
+
+    GLuint transformationMatrixBufferID;
+    glGenBuffers(1, &transformationMatrixBufferID);
+    glBindBuffer(GL_ARRAY_BUFFER, transformationMatrixBufferID) ;
+
+    // attribute 2 is transformation, according to our shader code
+    // recall that transformation is 16 floats (4x4 array)
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), ((float)width()) / height(), 0.1f, 10.0f) ;
+    glm::mat4 fullTransforms[] =
+    {
+        // First Instance
+        projectionMatrix * camera.getWorldToViewMatrix() * glm::translate(glm::vec3(-1.0f, 0.0f, -5.0f)) * glm::rotate(glm::radians(36.0f), glm::vec3(1.0f, 0.0f, 0.0f)),
+        // Second Instance
+        projectionMatrix * camera.getWorldToViewMatrix() * glm::translate(glm::vec3(1.0f, 0.0f, -5.75f)) * glm::rotate(glm::radians(126.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+    };
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(fullTransforms), fullTransforms, GL_STATIC_DRAW);
+    // first arguement is the attribute in the shader code
+    // eventually put this into a loop
+    glVertexAttribPointer(transformLocation , 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(float)*0)) ;
+    glVertexAttribPointer(transformLocation + 1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(float)*4)) ;
+    glVertexAttribPointer(transformLocation + 2, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(float)*8)) ;
+    glVertexAttribPointer(transformLocation + 3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(float)*12)) ;
+
+    glEnableVertexAttribArray(transformLocation);
+    glEnableVertexAttribArray(transformLocation +1);
+    glEnableVertexAttribArray(transformLocation +2);
+    glEnableVertexAttribArray(transformLocation +3);
+
+    glVertexAttribDivisor(transformLocation, 1);
+    glVertexAttribDivisor(transformLocation +1, 1);
+    glVertexAttribDivisor(transformLocation +2, 1);
+    glVertexAttribDivisor(transformLocation +3, 1);
+
+
+}
+
+
 void MeGlWindow::paintGL()
 {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT) ;
     glViewport(0, 0, width()*devicePixelRatio(), height()*devicePixelRatio());
-    /// modify the viewing matrix.  This will ensure that the viewing plane always stretches to the screen.
+    glDrawElementsInstanced(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0, 2) ;
 
-    glm::mat4 modelTransformMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f)) ;
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), ((float)width()) / height(), 0.1f, 10.0f) ;
-
-    GLint modelTransformMatrixUniformLocation = glGetUniformLocation(programID, "modelTransformMatrix") ;
-    GLint projectionMatrixUniformLocation = glGetUniformLocation(programID, "projectionMatrix") ;
-
-    // takes in color location handle, number of vectors, pointer to color data array
-    // handle, number of, bool for transposing matrix, pointer to matrix
-    glUniformMatrix4fv(modelTransformMatrixUniformLocation, 1, GL_FALSE, &modelTransformMatrix[0][0]);
-    glUniformMatrix4fv(projectionMatrixUniformLocation, 1, GL_FALSE, &projectionMatrix[0][0]);
-
-    glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, 0);
-
+    /// triangles example
     //glDrawArrays(GL_TRIANGLES, 0, 6) ;
     //sendAnotherTriToOpenGL();
     //glDrawArrays(GL_TRIANGLES, (numTris-1) * NUM_VERTICES_PER_TRI, NUM_VERTICES_PER_TRI);
+
+    /// colors example
     /*
     dominatingColor.r = 0;
     dominatingColor.b = 1;

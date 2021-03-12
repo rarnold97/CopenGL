@@ -12,6 +12,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include "Camera.h"
 
 // define some constants yo
 const float X_DELTA = 0.1f ;
@@ -24,19 +25,37 @@ const uint MAX_TRIS = 20 ;
 
 class MeGlWindow : public QGLWidget
 {
+
+    void sendDataToOpenGL();
+    bool checkStatus(GLuint objectID,
+                     PFNGLGETSHADERIVPROC objectPropertyGetterFunc,
+                     PFNGLGETSHADERINFOLOGPROC getInfoLogFunc,
+                     GLenum statusType) ;
+    bool checkShaderStatus(GLuint shaderID) ;
+    bool checkProgramStatus(GLuint programID) ;
+    std::string readShaderCode(const char* fileName) ;
+    void installShaders();
+
 protected:
     void initializeGL();
-    void sendDataToOpenGL();
-    void installShaders();
-    std::string readShaderCode(const char* fileName) ;
+    void paintGL();
     void sendAnotherTriToOpenGL() ;
 
     GLuint programID{} ;
-    //GLuint numIndices{} ;
+    GLuint numIndices{} ;
+
+    GLint positionLocation ;
+    GLint colorLocation ;
+    GLint transformLocation ;
+
+    Camera camera;
+
 public:
-    void paintGL();
+
     MeGlWindow() ;
     ~MeGlWindow() ;
+
+
 };
 
 #endif //COPENGL_MEGLWINDOW_H
